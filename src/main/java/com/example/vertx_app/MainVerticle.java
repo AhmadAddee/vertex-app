@@ -1,13 +1,10 @@
 package com.example.vertx_app;
 
 import io.vertx.core.*;
-import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
@@ -16,7 +13,7 @@ import io.vertx.mysqlclient.MySQLConnectOptions;
 import io.vertx.mysqlclient.MySQLPool;
 import io.vertx.sqlclient.*;
 
-import javax.swing.tree.RowMapper;
+import java.time.LocalDate;
 
 public class MainVerticle extends AbstractVerticle {
   private static final String LIST_ALL_POSTS_ADDR ="vertx.list_all_posts";
@@ -58,27 +55,37 @@ public class MainVerticle extends AbstractVerticle {
         .allowedHeader("Access-Control-Allow-Headers")
         .allowedHeader("Content-Type"))
       .handler(routingContext -> {
+        MultiMap queryParams = routingContext.queryParams();
+        String name = queryParams.contains("name") ? queryParams.get("name"): "unknown";
+        System.out.println("The name parameter is::: " + name);
+
         client
-          .query("SELECT * FROM user")
+          .query("SELECT created_date FROM post WHERE creator= '" + name + "'")
           .execute(ar -> {
             if (ar.succeeded()) {
               RowSet<Row> result = ar.result();
               System.out.println("Got " + result.size() + " rows ");
+
+              JsonArray dateList = new JsonArray();
               for (Row row : result) {
-                System.out.println("User " + row.getString(0) + " " + row.getString(1) + " " + row.getString(2) + " " + row.getInteger(3));
+                LocalDate date = row.getLocalDate(0);
+                dateList.add(row.getLocalDate(0).toString());
+                //dateList.add(date);
               }
+
+              dateList.forEach(s -> System.out.println(s));
               HttpServerResponse response = routingContext.response();
               response.setChunked(true);
               //response.write("Number of users " + result.size() + "\n");
               //for (Row row : result){
                 JsonObject jsonObject = new JsonObject();
                 jsonObject.put("amount_users", result.size());//.getValue("username")
-                System.out.println("The amount of users::: " + jsonObject.getInteger("amount_users"));
                 response//.setStatusCode(200).setStatusMessage("OK")
                   .putHeader("content-type", "application/json")
                   .putHeader("Access-Control-Allow-Origin", "*")
                   .putHeader("Access-Control-Allow-Methods", "GET")
-                  .end(jsonObject.getString("amount_users"));//.encode()
+                  .end(dateList.encode());
+                  //.end(jsonObject.getString("amount_users"));//.encode()
                   //.write(jsonObject.encode());
               //}
               /*
@@ -97,6 +104,6 @@ public class MainVerticle extends AbstractVerticle {
 
     httpServer
       .requestHandler(router)
-      .listen(8080);
+      .listen(8888);
   }
 }
