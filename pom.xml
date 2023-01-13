@@ -111,6 +111,12 @@
       <scope>compile</scope>
     </dependency>
 
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web-client</artifactId>
+      <version>4.3.7</version>
+    </dependency>
+
   </dependencies>
 
   <build>

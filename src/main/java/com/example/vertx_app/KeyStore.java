@@ -11,7 +11,7 @@ public class KeyStore {
     "46P28dFv6/m5GU/DOWhxQhHlUPIvzNKaU+fANVyVEFuHxGU6xsUiW20Nv6GUC0Rw" +
     "WQIDAQAB";// +
   //"-----END PUBLIC KEY-----";
-
+/*
   private static final String privateKey = "-----BEGIN RSA PRIVATE KEY-----\n" +
                                            "MIIEowIBAAKCAQEApzY9brM8bjd3RVc+pNCdlIhT8PduqzUKUVyn0mFaJqSusxSB\n" +
                                            "5KBevmLmCeclISjZ2+2pSx7JHyYmgGLhvpLTNV9kj7yuyaRJ8gmRtNBpy5rLzQrE\n" +
@@ -39,12 +39,12 @@ public class KeyStore {
                                            "XFTn66bo5KppKA7baq1KJsS9ohoGlZb0CjFAz6+Is7eGciKEXbmF/ohL8iVtoy14\n" +
                                            "BCZUxfWIpd9EMndqML/Iy3epueP8+GXqHDbaGospO2DUCIYS43hd\n" +
                                            "-----END RSA PRIVATE KEY-----";
-
+*/
   public static String getPublicKey(){
     return publicKey;
   }
-
+/*
   public static String getPrivateKey(){
     return privateKey;
-  }
+  }*/
 }

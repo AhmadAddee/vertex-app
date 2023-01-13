@@ -1,24 +1,15 @@
 package com.example.vertx_app;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.*;
 import io.vertx.core.http.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
-import io.vertx.ext.auth.authentication.Credentials;
-import io.vertx.ext.auth.authentication.TokenCredentials;
-import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
-import io.vertx.ext.auth.impl.UserImpl;
 import io.vertx.ext.auth.impl.jose.JWT;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
-import io.vertx.ext.web.AllowForwardHeaders;
-import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.handler.SessionHandler;
@@ -28,9 +19,7 @@ import io.vertx.mysqlclient.MySQLConnectOptions;
 import io.vertx.mysqlclient.MySQLPool;
 import io.vertx.sqlclient.*;
 
-import java.time.LocalDate;
 import java.util.*;
-import java.util.logging.Logger;
 
 public class MainVerticle extends AbstractVerticle {
   private static final String LIST_ALL_POSTS_ADDR ="vertx.list_all_posts";
@@ -38,8 +27,6 @@ public class MainVerticle extends AbstractVerticle {
   private static final String LIST_ALL_POSTS = "SELECT * FROM social_forum_db.post";
 
   private final String publicKey = KeyStore.getPublicKey();
-
-  SqlClient sqlClient;
 
   private User user = new User();
 
@@ -125,7 +112,8 @@ public class MainVerticle extends AbstractVerticle {
         /**
          * Trying to generate a JWT according to those promises
          * that vertx has!
-         * *//*
+         * */
+        /*
         JsonObject notUsedObject = new JsonObject().put("token", jwt);
         System.out.println("Not used object: " + notUsedObject);
         System.out.println("The authorities: " + JWT.parse(jwt).getJsonObject("payload").getString("authorities"));
@@ -148,13 +136,10 @@ public class MainVerticle extends AbstractVerticle {
         authenticated.onSuccess(s -> System.out.println("The authentication process succeeded"))
             .onFailure(s -> System.out.println("Failed: " + s.getMessage()));
 
-
         com.example.vertx_app.User user = new com.example.vertx_app.User();
         user.setUsername(name); user.setPassword("$2a$10$nPAbIPNSCcJDBp1.n2u5oeORQwpHRiXahcmGGFVUoxsE8fJ8igzg2"); user.setAge(28);
         boolean valid = jwtUtil.validateToken(jwt, user);
         System.out.println("\nValid user? : " + valid);*/
-
-
 
         client
           .query("SELECT created_date FROM post WHERE creator_username= '" + name + "'")
@@ -165,18 +150,11 @@ public class MainVerticle extends AbstractVerticle {
 
               JsonArray dateList = new JsonArray();
               for (Row row : result) {
-                LocalDate date = row.getLocalDate(0);
                 dateList.add(row.getLocalDate(0).toString());
-                //dateList.add(date);
               }
 
-              //dateList.forEach(s -> System.out.println(s));
               HttpServerResponse response = routingContext.response();
-              //routingContext.user().principal().put("Authorization", "True");
-              //System.out.println("The user principal: " + routingContext.user().principal().toString());;
               response.setChunked(true);
-              //response.write("Number of users " + result.size() + "\n");
-              //for (Row row : result){
                 JsonObject jsonObject = new JsonObject();
                 jsonObject.put("amount_users", result.size());//.getValue("username")
                 response//.setStatusCode(200).setStatusMessage("OK")
@@ -184,33 +162,11 @@ public class MainVerticle extends AbstractVerticle {
                   .putHeader("Access-Control-Allow-Origin", "*")
                   .putHeader("Access-Control-Allow-Methods", "GET")
                   .end(dateList.encode());
-                  //.end(jsonObject.getString("amount_users"));//.encode()
-                  //.write(jsonObject.encode());
-              //}
-              /*
-              response//.setStatusCode(200).setStatusMessage("OK")
-                .putHeader("content-type", "application/json")
-                .putHeader("Access-Control-Allow-Origin", "*")
-                .putHeader("Access-Control-Allow-Methods", "GET")
-                .end();
-               */
             } else {
               System.out.println("Failure: " + ar.cause().getMessage());
             }
           });
       });
-/*
-    JWTAuth authProvider = JWTAuth.create(vertx, config().getJsonObject("keycloak.oidc"));
-    router.route("/protected/*").handler(
-      JWTAuthHandler.create(authProvider)
-    );
-    router.route("/protected/somepage").handler(ctx -> {
-      //String tehSubject = ctx.user().principal().getString("sub");
-      //String someKey = ctx.user().principal().getString("someKey");
-      logger.info("Headers: {}", ctx.request().headers().get("Authorization"));
-      logger.info(ctx.user().principal().encodePrettily());
-    });
- */
 
     httpServer
       .requestHandler(router)
